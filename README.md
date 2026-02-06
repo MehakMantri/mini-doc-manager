@@ -91,18 +91,6 @@ Frontend includes:
 
 ![architecture](diagram.png)
 
-```
-[ React Frontend ]
-        |
-        | REST APIs
-        v
-[ Express Backend ]
-   |           |
-   |           └── Local Disk (uploaded files)
-   |
-   └── MongoDB (document metadata)
-```
-
 ### Upload Flow
 
 Frontend → Backend → Disk + MongoDB
