@@ -162,61 +162,59 @@ Documents are filtered by title and sorted by upload date (newest first / oldest
 
 ![search-sort](image-4.png)
 
+---
+
 ## Design Questions
+
+---
 
 ### 1. Multiple Uploads
 
-**How are multiple documents handled?**
+The system supports uploading multiple documents in a **single request** using `multipart/form-data`. All files are processed together by the backend and stored in one operation.
 
-* Multiple documents are uploaded in **one request**
-* Multer processes multiple files in a single multipart payload
-* Metadata is stored using `insertMany`
+**Tradeoffs:**
 
-**Tradeoffs**
-
-* Larger request size
-* Simpler API and fewer network calls
-* File size limits mitigate risk
+* Fewer network requests and simpler API design
+* Larger request payloads, mitigated by basic file size limits
+* Easier to handle atomic uploads compared to multiple individual requests
 
 ---
 
 ### 2. Streaming
 
-**Why is streaming important?**
+Streaming is used for downloading documents to avoid loading the entire file into server memory.
 
-* Streaming keeps memory usage constant
-* Supports large files and concurrent downloads
-* Prevents server crashes
+**If the full file were loaded into memory:**
 
-**If full files were loaded into memory:**
+* Memory usage would increase significantly for large files
+* Concurrent downloads could exhaust server resources
+* The system would scale poorly and risk crashes
 
-* High memory usage
-* Poor scalability
-* Risk of process crashes under load
+Using streaming ensures constant memory usage and safer handling of downloads.
 
 ---
 
 ### 3. Moving to S3
 
-**If files moved to object storage (e.g., S3):**
+If files were moved to object storage such as S3:
 
-* Backend would upload files to S3 instead of disk
-* MongoDB would store S3 object metadata
-* Backend might return signed URLs
-* Backend may no longer handle file bytes directly
+* The backend would upload files directly to S3 instead of local disk
+* MongoDB would store object metadata (bucket, key, URLs)
+* The backend could return pre-signed URLs for downloads
+
+In this setup, the backend would primarily coordinate access and would not need to stream file bytes itself.
+
+---
+
+### 4. Frontend UX
+
+If more time were available:
+
+* **Document Preview:** Add previews using content-type detection (e.g., inline preview for images or PDFs).
+* **Upload Progress:** Show real-time upload progress using progress events (`XMLHttpRequest` or Axios `onUploadProgress`).
 
 ---
 
-### 4. Frontend UX Improvements
-
-**If more time were available:**
-
-* Document preview using content-type detection
-* Upload progress using `XMLHttpRequest` or Axios progress events
-* Better pagination indicators
-* File type icons
-
----
 ## Setup Assumptions
 
 * Local MongoDB or MongoDB Atlas is available
